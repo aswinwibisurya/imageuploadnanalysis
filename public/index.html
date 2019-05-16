@@ -4,8 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    <p>Hello World!</p>
+    
+    
+
+    <div class="container">
+        <div class="row">
+            <form id="formUpload" action="/upload" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    Input Image URL to analyze:
+                    <input type="file" id="imgUpload" name="imgUpload" />
+                </div>
+                
+                <input type="submit" value="Upload and Analyze" class="btn btn-primary"/>
+            </form>
+        </div>
+        <div class="row">
+                <img id="imgUploadedBlob"/>
+        </div>
+        <div class="row">
+            <h2>Analysis:</h2>
+        </div>
+        <div class="row">
+            <table class="table table-dark" id="tblAnalysis">
+                
+            </table>
+        </div>
+    </div>
+        
+    
+        
+    
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    
+        $(function() {
+            $('#formUpload').on('submit', function(e) {
+                e.preventDefault()
+                $.ajax({
+                    url: '/upload',
+                    type: 'POST',
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        console.log(data.url)
+                        $('#imgUploadedBlob')[0].src = data.url
+                        
+                        $.ajax({
+                            url: '/analyze?image=' + data.url,
+                            type: 'GET',
+                            success: function(data) {
+                                console.log(data)
+
+                                
+                                const keys = Object.keys(data)
+                                keys.forEach(function(key) {
+                                    console.log(key)
+                                    const tr = $('<tr></tr>');
+                                    
+                                    const th = $('<th></th>');
+                                    th.html(key);
+                                    
+                                    const td = $('<td></td>');
+
+                                    if(typeof data[key] === 'object') {
+                                        td.html(JSON.stringify(data[key]));
+                                    } else {
+                                        td.html(data[key]);
+                                    }
+
+                                    
+
+                                    tr.append(th);
+                                    tr.append(td);
+                                    $('#tblAnalysis').append(tr);
+                                })
+                            }
+                        })
+                    }
+                })
+            })
+        })
+    </script>
 </body>
 </html>
